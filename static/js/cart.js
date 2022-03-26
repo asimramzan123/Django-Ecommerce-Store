@@ -19,7 +19,8 @@ for( i=0; i <UpdateButtons.length; i++){
     // checking if user is authenticated or not.
         console.log('User:',user )
         if (user == 'AnonymousUser'){
-            console.log('User is not authenticated')
+            // console.log('User is not authenticated')
+            addCookieItem(productId, action)
         }
         else{
             updateUserOrder(productId, action)
@@ -63,6 +64,49 @@ function updateUserOrder(productId, action){
 
 }
 
+function addCookieItem(productId, action){
+    console.log('User is not Logged In')
 
 
+    // // what actually addCookieItem is trying to come up with
+    // cart ={
+    //     // 1 is productId and then how much quantity is available
+    //     1 : {"quantity":4},
+    //     3 : {"quantity":2},
+    // }
 
+    // check the action
+    if (action == 'add'){
+        // if cart is empty or undefined then create cart
+		if (cart[productId] == undefined){
+
+		cart[productId] = {'quantity':1}
+
+		}
+        // if already there then go ahead and incrrease quantity
+        else{
+			cart[productId]['quantity'] += 1
+		}
+	}
+
+    // decreasing quantity or removing the item
+
+	if (action == 'remove'){
+        // reduce by 1
+		cart[productId]['quantity'] -= 1
+
+		if (cart[productId]['quantity'] <= 0){
+			console.log('Item should be deleted')
+			delete cart[productId];
+		}
+	}
+
+    // check cart value
+    console.log('Cart',cart)
+    // overwrite whatever cookies has set to the cart
+    document.cookie = 'cart=' + JSON.stringify(cart) + ';domain=;path=/'
+
+    // to check whether location gets updated
+    location.reload()
+
+}

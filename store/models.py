@@ -8,8 +8,8 @@ from django.contrib.auth.models import User
 # Customer Model 
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, blank = True, null = True)
-    name = models.CharField(null=True, blank=True, max_length=100)
-    email = models.CharField(max_length = 100, blank = True, null = True)
+    name = models.CharField(null=True, blank=True,max_length=100 )
+    email = models.EmailField(max_length = 100, blank = True, null = True)
     
     def __str__(self):
         return self.name
@@ -17,7 +17,7 @@ class Customer(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=100, blank = True)
-    price = models.FloatField()
+    price = models.DecimalField(decimal_places=2, max_digits = 6)
     
     # digital product like pdf book etc , which don't need shipping
     digital = models.BooleanField(default=False, null=True, blank=True)
@@ -92,7 +92,7 @@ class ShippingAddress(models.Model):
     address = models.CharField(max_length=254, null=False)
     city = models.CharField(max_length=254, null=False)
     state = models.CharField(max_length=254, null=False)
-    zipcode = models.IntegerField(max_length=8, null=False)
+    zipcode = models.IntegerField(null=False)
     date_added = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

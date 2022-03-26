@@ -27,7 +27,40 @@
                 }
                 return cookieValue;
             }
-            const csrftoken = getToken('csrftoken');
+const csrftoken = getToken('csrftoken');
+            // code to parse some cookies
+function getCookie(name){
+
+              // split cookie string and get all individual, name = value, pairs in an array
+        var cookieArray = document.cookie.split(';');
+
+        // Loop through array element
+        for (i =0, i<cookieArray.length; i++;){
+
+            var cookiePair = cookieArray[i].split('=');
+
+            // removing white space at begining of cookie name and comparing it with string
+            if (name == cookiePair[0].trim()){
+                return decodeURIComponent(cookiePair[1])
+            }
+        }
+
+              // return null if not found
+              return null
+ }
+
+var cart = JSON.parse(getCookie('cart'))
+
+// check cookie if created?
+if (cart == undefined){
+      cart = {}
+      console.log('cart created!', cart)
+      //getting cookie and converting into string, then assigning it into main domain of website
+      document.cookie = 'cart=' + JSON.stringify(cart) + ';domain=;path=/'
+            }
+
+console.log('Cart', cart)
+
             </script>
           </head>
 

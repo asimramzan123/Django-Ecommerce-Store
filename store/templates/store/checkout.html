@@ -11,6 +11,7 @@
             <div class="box-element" id ='form-wrapper'>
 
                 <form action="" class="form">
+                    {% csrf_token %}
                     <div class="user-info">
                         
                         <div class="form-field">
@@ -99,7 +100,11 @@
             document.getElementById('payment-info').classList.remove("hidden");
         }
 
+        //checking items
         var form = document.getElementById('form')
+        csrf_token = form.getElementByTagName('input')[0].value
+        console.log('Newtoken:', form.getElementByTagName('input')[0].value)
+
 		form.addEventListener('submit', function(e){
 	    	e.preventDefault()
 	    	console.log('Form Submitted...')
@@ -149,7 +154,7 @@
 	    		method:'POST',
 	    		headers:{
 	    			'Content-Type':'applicaiton/json',
-	    			'X-CSRFToken':csrftoken,
+	    			'X-CSRFTOKEN':csrftoken,
 	    		}, 
 	    		body:JSON.stringify({'form':userFormData, 'shipping':shippingInfo}),
 	    		

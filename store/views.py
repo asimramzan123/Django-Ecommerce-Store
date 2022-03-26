@@ -1,79 +1,38 @@
+from re import T
 from django.http import JsonResponse
 from django.shortcuts import render
 import json, datetime
 from .models import *
+from .utils import cookieCart, cartData, guestOrder
 from pprint import pprint
-
-# Create your views here.
-
-
-def cart(request):
-    
-    # check out if user is authenticated(logedin)
-    if request.user.is_authenticated:
-        
-        # get customer as user
-        customer = request.user.customer
-        
-        # get order or create one, and use the open cart(complete=false)
-        order ,created = Order.objects.get_or_create(customer=customer, complete=False)
-        
-        # get the items attached to that orders
-        # getting orderitems with parent item order
-        items = order.orderitem_set.all()
-        cartItems = order.get_cart_items
-        
-    else:
-        # shows this error if not logged in: local variable 'order' referenced before assignment
-        items = []
-        # this is what we would get without login
-        order = {
-            'get_cart_total':0,
-            'get_cart_items':0,
-            "shipping": False,
-        }   
-        cartItems = order.get_cart_items
-        
-    
-    context = {
-        'items':items,
-        'order': order,
-        'cartItems':cartItems,
- }
-    return render(request, 'store/cart.html', context)
 
 
 def store(request):
-    
-    if request.user.is_authenticated:
-        
-        # get customer as user
-        customer = request.user.customer
-        
-        # get order or create one, and use the open cart(complete=false)
-        order ,created = Order.objects.get_or_create(customer=customer, complete=False)
-        
-        # get the items attached to that orders
-        # getting orderitems with parent item order
-        items = order.orderitem_set.all()
-        cartItems = order.get_cart_items
-    else:
-        # shows this error if not logged in: local variable 'order' referenced before assignment
-        items = []
-        # this is what we would get without login
-        order = {
-            'get_cart_total':0,
-            'get_cart_items':0,
-            "shipping": False
-        }   
-        cartItems = order['get_cart_items']
-        
+
+    data = cartData(request)
+    cartItems = data['cartItems']
+
     products = Product.objects.all() 
     context = {
         'products' : products,
         'cartItems':cartItems
         }
     return render(request, 'store/store.html', context)
+
+
+def cart(request):
+    
+    data = cartData(request)
+    cartItems = data['cartItems']
+    order = data['order']
+    items = data['items']     
+ 
+    context = {
+        'items':items,
+        'order': order,
+        'cartItems':cartItems,
+ }
+    return render(request, 'store/cart.html', context)
 
 
 def update_item(request):
@@ -108,34 +67,14 @@ def update_item(request):
     return JsonResponse('Item was added', safe = False)
 
 
+
 def checkout(request):
-    # check out if user is authenticated(logedin)
-    if request.user.is_authenticated:
-        
-        # get customer as user
-        customer = request.user.customer
-        
-        # get order or create one, and use the open cart(complete=false)
-        order ,created = Order.objects.get_or_create(customer=customer, complete=False)
-        
-        # get the items attached to that orders
-        # getting orderitems with parent item order
-        items = order.orderitem_set.all()
-        cartItems = order.get_cart_items
-        
-    else:
-        # shows this error if not logged in: local variable 'order' referenced before assignment
-        items = []
-        cartItems = order.get_cart_items
-        
-        # this is what we would get without login
-        order = {
-            'get_cart_total': 0,
-            'get_cart_items': 0,
-            "shipping": False
-            
-        }   
     
+    data = cartData(request)
+    cartItems = data['carcustomertItems']
+    order = data['order']
+    items = data['items']
+        
     context = {
         'items':items,
         'order': order,
@@ -143,35 +82,35 @@ def checkout(request):
 }
     return render(request, 'store/checkout.html', context)
 
-
 def process_order(request):
-    print('Data',request.body)
+    
     transaction_id = datetime.datetime.now().timestamp()
     data = json.loads(request.body)
     
     if request.user.is_authenticated:
-        
-        # get customer as user
         customer = request.user.customer
-        order ,created = Order.objects.get_or_create(customer=customer, complete=False)
-        total = float(data['form']["total"])
-        order.transaction_id = transaction_id
-        
-        if total == order.get_cart_total:
-            order.complete = True
-        order.save()
-        
-        if order.shipping == True:
-            ShippingAddress.objects.create(
-                customer = customer,
-                order = order,
-                address = data['shipping']['address'],
-                city = data['shipping']['city'],
-                state = data['shipping']['state'],
-                zipcode = data['shipping']['zipcode'],
-
-            )
-    else:
-        print('User is not logged in.')
+    order, created = Order.objects.get_or_create(customer=customer, complete=False)
     
-    return JsonResponse('Payment Complete', safe = False)
+    else: 
+        customer, order = guestOrder(request, data)
+        
+    total = float(data['form']['total'])
+    order.transaction_id = transaction_id
+    
+    if total == order.get_cart_total:
+        order.complete = True
+    order.save()
+    
+    if order.shipping == True:
+        ShippingAddress.objects.create(
+        customer = customer,
+        order = order,
+        address = data['shipping']['address'],
+        city = data['shipping']['city'],
+        state = data['shipping']['state'],
+        zipcode = data['shipping']['zipcode'],
+    )
+    return JsonResponse('Payment submitted..', safe=False)
+
+
+    
