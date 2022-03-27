@@ -113,16 +113,16 @@ def guestOrder(request, data):
 		customer=customer,
 		complete=False,
 		)
+    
     for item in items:
-	    product = Product.objects.get(id=item['id'])
-        orderItem = OrderItem.objects.create
-        (
-			product=product,
-			order=order,
-			quantity=item['quantity'],
+        product = Product.objects.get(id = item['id'])
+        orderItem = OrderItem.objects.create(
+            product=product,
+            order=order,
+            quantity=item['quantity'],)
             # if:
             #     item['quantity'] >0
             # else:
             # -1*item['quantity']) # negative quantity = freebies
-		)
+        
     return customer, order
