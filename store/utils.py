@@ -9,8 +9,7 @@ def cookieCart(request):
     except:
         # if cart cookie is not available
         cart = {}
-        
-    print('Cart', cart)
+        print('Cart', cart)
     
     # shows this error if not logged in: local variable 'order' referenced before assignment
     items = []
@@ -26,36 +25,39 @@ def cookieCart(request):
     for i in cart:
         # incase product is not available in database , so to prevent error
         try:
-            cartItems += cart[i]["quantity"]
+            if(cart[i]['quantity']>0): #items with negative quantity = lot of freebies  
+                cartItems += cart[i]["quantity"]
+                
+                # query the products by id
+                product = Product.objects.get(id=i)
+                total = (product.price * cart[i]["quantity"])
+                
+                # update cart total
+                order["get_cart_total"] += total
+                
+                # updating for actual items
+                order["get_cart_items"] += cart[i]["quantity"]
             
-            # query the products by id
-            product = Product.objects.get(id=i)
-            total = (product.price * cart[i]["quantity"])
-            
-            # update cart total
-            order["get_cart_total"] += total
-            
-            # updating for actual items
-            order["get_cart_items"] += cart[i]["quantity"]
-        
-            # converting item dictionery data into displayable data
-            item = {
-                # first attribute of an item
-                'product':{
-                    'id':product.id,
-                    'name':product.name,
-                    'price':product.price,
-                    'imageURL':product.imageURL,    
-                },
-                # second and third attribute of an item
-                'quantity':cart[i]['quantity'],
-                'get_total':total
-            }
-            
-            items.append(item)
-            
-            if product.digital == False:
-                order['shipping'] = True 
+                # converting item dictionery data into displayable data
+                item = {
+                    'id' :product.id,
+                    # first attribute of an item
+                    'product' :{
+                        'id':product.id,
+                        'name':product.name,
+                        'price':product.price,
+                        'imageURL':product.imageURL,    
+                    },
+                    # second and third attribute of an item
+                    'quantity' :cart[i]['quantity'],
+                    'digital' :product.digital,
+                    'get_total' :total
+                }
+                
+                items.append(item)
+                
+                if product.digital == False:
+                    order['shipping'] = True 
                 
         except:
             pass  
@@ -119,7 +121,7 @@ def guestOrder(request, data):
         orderItem = OrderItem.objects.create(
             product=product,
             order=order,
-            quantity=item['quantity'],)
+            quantity=(item['quantity'] if item['quantity'] > 0 else -1 * item['quantity']),)
             # if:
             #     item['quantity'] >0
             # else:

@@ -11,7 +11,9 @@ def store(request):
 
     data = cartData(request)
     cartItems = data['cartItems']
-
+    order = data['order']
+    items = data['items']     
+ 
     products = Product.objects.all() 
     context = {
         'products' : products,
@@ -36,18 +38,19 @@ def cart(request):
 
 
 def update_item(request):
-    print("updating---item")
+    # print("updating---item")
     # set value of data to response
     data = json.loads(request.body)
     productId = data['productId']
     action = data['action']
-
+    print('Action', action)
+    print('Product', productId)
 
     # querying the customer
-    customer = request.user
-    print(customer.is_authenticated)
+    customer = request.user.customer
+    # print(customer.is_authenticated)
     # print(customer.customer)
-    customer=customer.customer
+    # customer=customer.customer
 
     product = Product.objects.get(id= productId)
     order, created  = Order.objects.get_or_create(customer = customer, complete = False)
@@ -67,7 +70,6 @@ def update_item(request):
     return JsonResponse('Item was added', safe = False)
 
 
-
 def checkout(request):
     
     data = cartData(request)
@@ -81,6 +83,7 @@ def checkout(request):
         'cartItems':cartItems
 }
     return render(request, 'store/checkout.html', context)
+
 
 def process_order(request):
     

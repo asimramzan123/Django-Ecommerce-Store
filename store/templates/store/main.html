@@ -13,13 +13,19 @@
               var user = '{{request.user}}'
 
               function getToken(name) {
-                let cookieValue = null;
+
+                var cookieValue = null;
+
                 if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
+
+                    var cookies = document.cookie.split(';');
+
                     for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
+
+                        var cookie = cookies[i].trim();
                         // Does this cookie string begin with the name we want?
                         if (cookie.substring(0, name.length + 1) === (name + '=')) {
+
                             cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
                             break;
                         }
@@ -32,15 +38,16 @@ const csrftoken = getToken('csrftoken');
 function getCookie(name){
 
               // split cookie string and get all individual, name = value, pairs in an array
-        var cookieArray = document.cookie.split(';');
+        var cookieArr = document.cookie.split(';');
 
         // Loop through array element
-        for (i =0, i<cookieArray.length; i++;){
+        for (i =0, i<cookieArr.length; i++;){
 
-            var cookiePair = cookieArray[i].split('=');
+            var cookiePair = cookieArr[i].split('=');
 
             // removing white space at begining of cookie name and comparing it with string
             if (name == cookiePair[0].trim()){
+
                 return decodeURIComponent(cookiePair[1])
             }
         }
@@ -68,7 +75,7 @@ console.log('Cart', cart)
 
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 
-            <a class="navbar-brand" href="{% url 'store' %}">Ecomerce</a>
+            <a class="navbar-brand" href="{% url 'store' %}">E-Commerce</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
               <span class="navbar-toggler-icon"></span>
             </button>
